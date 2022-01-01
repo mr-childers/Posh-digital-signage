@@ -3,7 +3,11 @@
 .Synopsis
    Opens a Microsoft PowerPoint presentation in Kiosk Mode
 .DESCRIPTION
-   Long description
+   A function to open a PowerPoint presentation with limited parameter support, end goal is to use for 
+   digital signage or kiosk displays. 
+   
+   This will be part of a larger tool set  wip…
+
 .EXAMPLE
    Open-Presentation -Path ./filename.pptx 
 #>
@@ -101,42 +105,34 @@ function Open-Presentation {
 
 
 
-######################################
+############################################################################
+<#
+Testing better approach to Repetitive Content,
+Mimic VB With 
+
+#> 
 
 function with {
+    param(
+        [Parameter(Mandatory = $true,
+            ValueFromPipeLine = $true,
+            Position = 0)]
+        [Object]$Object,
 
- param(
-
-  [Parameter(Mandatory = $true, Position = 0, ValueFromPipeLine = $true)]
-
-  [Object]
-
-  $Object,
-
-  [Parameter(Mandatory = $true, Position = 1)]
-
-  [String]
-
-  $Block
-
- )
-
- begin {
-
-  $code = $Block -replace '(?m)^\s*(?=\.)', '$Object'
-
- }
-
- process {
-
-  [ScriptBlock]::Create($code).Invoke()
-
- }
-
+        [Parameter(Mandatory = $true, 
+            Position = 1)]
+        [String]$Block
+    )
+    begin {
+        $code = $Block -replace '(?m)^\s*(?=\.)', '$Object'
+    }
+    process {
+        [ScriptBlock]::Create($code).Invoke()
+    }
 }
 
  
- # ...or use the function
+# ...with function call
 
 with ($Application.ActivePresentation.SlideShowSettings) @'
         .StartingSlide      = 1
@@ -149,19 +145,18 @@ with ($Application.ActivePresentation.SlideShowSettings) @'
 
 
 
-#######################################
-
+############################################################################
+# Splatting / Hashtable
 
 $commonParams = @{
-        StartingSlide      = '1'
-        EndingSlide        = '$Application.ActivePresentation.Slides.Count'
-        AdvanceMode        = '$ppSlideShowUseSlideTimings'
-        LoopUntilStopped   = '$msoTrue'
-        ShowType           = '$ppShowTypeKiosk'
+    StartingSlide    = '1'
+    EndingSlide      = '$Application.ActivePresentation.Slides.Count'
+    AdvanceMode      = '$ppSlideShowUseSlideTimings'
+    LoopUntilStopped = '$msoTrue'
+    ShowType         = '$ppShowTypeKiosk'
 }
 
-foreach($key in $commonParams.keys)
-{
+foreach ($key in $commonParams.keys) {
     $message = '$Application.ActivePresentation.SlideShowSettings.{0} = {1}' -f $key, $commonParams[$key]
     Write-Output $message
 }
